@@ -1,13 +1,19 @@
 import java.util.Deque;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class CarSupplier implements Runnable {
     private Deque<Car> showcase;
+    private ReentrantLock lock;
+    private Condition condition;
     private String brand;
     private int numCars;
     private long carDeliveryTime;
 
-    public CarSupplier(Deque<Car> showcase, String brand, int numCars, int carDeliveryTime) {
+    public CarSupplier(Deque<Car> showcase, ReentrantLock lock, Condition condition, String brand, int numCars, int carDeliveryTime) {
         this.showcase = showcase;
+        this.lock = lock;
+        this.condition = condition;
         this.brand = brand;
         this.numCars = numCars;
         this.carDeliveryTime = carDeliveryTime;
@@ -29,9 +35,12 @@ public class CarSupplier implements Runnable {
     }
 
     private void putCar(Car car) {
-        synchronized (showcase) {
+        lock.lock();
+        try {
             showcase.addLast(car);
-            showcase.notify();
+            condition.signal();
+        } finally {
+            lock.unlock();
         }
     }
 }
