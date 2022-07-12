@@ -1,12 +1,10 @@
-import java.util.Deque;
-
 public class Customer implements Runnable {
-    private final Deque<Car> showcase;
-    private final long timeToMakePurchaseDecision;
+    private final CarShowroom showroom;
+    private final long decisionMakingTime;
 
-    public Customer(Deque<Car> showcase, int timeToMakePurchaseDecision) {
-        this.showcase = showcase;
-        this.timeToMakePurchaseDecision = timeToMakePurchaseDecision;
+    public Customer(CarShowroom showroom) {
+        this.showroom = showroom;
+        this.decisionMakingTime = showroom.decisionMakingTime;
     }
 
     @Override
@@ -14,23 +12,8 @@ public class Customer implements Runnable {
         String name = Thread.currentThread().getName();
         try {
             System.out.println("Посетитель " + name + " вошел в салон");
-            Thread.sleep(timeToMakePurchaseDecision);
+            Thread.sleep(decisionMakingTime);
         } catch (InterruptedException ignored) { }
-        buyCar();
-    }
-
-    private void buyCar() {
-        String name = Thread.currentThread().getName();
-        synchronized (showcase) {
-            try {
-                while (showcase.isEmpty()) {
-                    System.out.println("Посетилель " + name + " ожидает в очереди");
-                    showcase.wait();
-                }
-            } catch (InterruptedException ignored) {
-            }
-            Car car = showcase.pollFirst();
-            System.out.println("Посетилель " + name + " купил авто марки " + car.getBrand() + " и покинул салон");
-        }
+        showroom.buyCar();
     }
 }
